@@ -57,9 +57,29 @@ document.getElementById('generate-btn').addEventListener('click', function() {
     // Génération de l'ID
     document.getElementById('report-id').textContent = Math.floor(Math.random() * 90000) + 10000;
     
-    // Construction du texte de diagnostic
-    const fullDiagnosis = `${data.parts[bodyPart]} \nCAUSE : ${cause.label}. \n\n${cause.description} \n\nNOTE : ${scenario.details}`;
-    document.getElementById('diagnosis-text').innerText = fullDiagnosis;
+    // Génération des indicateurs médicaux aléatoires
+    const diagnosisList = document.getElementById('diagnosis-list');
+    diagnosisList.innerHTML = '';
+
+    const addDiagItem = (label, value) => {
+        const li = document.createElement('li');
+        li.innerHTML = `<strong>${label} :</strong> ${value}`;
+        diagnosisList.appendChild(li);
+    };
+
+    addDiagItem("LOCALISATION", data.parts[bodyPart]);
+    addDiagItem("CAUSE", cause.label);
+    
+    // Logique de probabilité pour les indicateurs selon la gravité
+    const hasFracture = (severity === 'critique' || Math.random() > 0.5);
+    const hasHemorragie = (severity === 'critique' || severity === 'moderee' || Math.random() > 0.6);
+    const hasInfection = (Math.random() > 0.7);
+    const hasChoc = (severity === 'critique' || (severity === 'moderee' && Math.random() > 0.5));
+
+    addDiagItem("FRACTURE", hasFracture ? "OUI (Ouverte/Éclats)" : "NON");
+    addDiagItem("HÉMORRAGIE", hasHemorragie ? "OUI (Active)" : "NON / CONTRÔLÉE");
+    addDiagItem("ÉTAT DE CHOC", hasChoc ? "PRÉSENT" : "ABSENT");
+    addDiagItem("NOTE MÉDICALE", scenario.details);
     
     // Remplissage du protocole
     const protocolList = document.getElementById('protocol-list');
@@ -71,7 +91,7 @@ document.getElementById('generate-btn').addEventListener('click', function() {
     const isMembre = ['bras-gauche', 'bras-droit', 'jambe-gauche', 'jambe-droit'].includes(bodyPart);
     const isThoraxAbdomen = (bodyPart === 'torse');
 
-    if (isMembre && (severity === 'critique' || causeKey === 'balle' || causeKey === 'mine')) {
+    if (isMembre && (severity === 'critique' || hasHemorragie || causeKey === 'balle')) {
         finalProtocol.unshift("Pose immédiate de GARROT (point de pression haut)");
     }
 
@@ -80,7 +100,7 @@ document.getElementById('generate-btn').addEventListener('click', function() {
     }
 
     // Ajout des étapes basées sur la gravité (si critique)
-    if (severity === 'critique') {
+    if (severity === 'critique' || hasChoc) {
         finalProtocol.push("Injection de morphine (1/2 grain)");
         finalProtocol.push("Évacuation chirurgicale immédiate");
     }
