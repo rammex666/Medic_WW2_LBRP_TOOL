@@ -15,20 +15,17 @@ const data = {
     },
     scenarios: {
         legere: {
-            label: "CODE VERT - PRIORITÉ BASSE",
-            statusClass: "code-vert",
+            label: "PRIORITÉ BASSE",
             details: "Lésion superficielle. Tissus mous légèrement touchés. Pas de signe de choc interne.",
             protocol: ["Nettoyage à l'iode", "Saupoudrage de Sulfa", "Bandage standard", "Retour au poste"]
         },
         moderee: {
-            label: "CODE JAUNE - PRIORITÉ MOYENNE",
-            statusClass: "code-jaune",
+            label: "PRIORITÉ MOYENNE",
             details: "Blessure significative avec hémorragie veineuse contrôlable. Risque d'infection modéré.",
             protocol: ["Compression directe", "Nettoyage profond", "Pansement compressif", "Surveillance 12h"]
         },
         critique: {
-            label: "CODE ROUGE - PRIORITÉ ABSOLUE",
-            statusClass: "code-rouge",
+            label: "PRIORITÉ ABSOLUE",
             details: "Traumatisme majeur. Hémorragie artérielle ou dégâts osseux massifs. Signes de choc hypovolémique.",
             protocol: ["Pose de garrot immédiate", "Injection de morphine (1/2 grain)", "Plasma intraveineux", "Évacuation chirurgicale"]
         }
@@ -38,16 +35,18 @@ const data = {
 document.getElementById('generate-btn').addEventListener('click', function() {
     const bodyPart = document.getElementById('body-part').value;
     const cause = document.getElementById('cause').value;
-    const severity = document.querySelector('input[name="severity"]:checked').value;
+    
+    // Sélection aléatoire de la gravité
+    const severityLevels = ['legere', 'moderee', 'critique'];
+    const severity = severityLevels[Math.floor(Math.random() * severityLevels.length)];
     
     const scenario = data.scenarios[severity];
     
     // Reset et affichage du rapport
     const reportSection = document.getElementById('report-output');
-    reportSection.classList.remove('hidden', 'code-vert', 'code-jaune', 'code-rouge');
-    reportSection.classList.add(scenario.statusClass);
+    reportSection.classList.remove('hidden');
     
-    // Mise à jour de la barre de statut
+    // Mise à jour de la barre de statut (sans codes couleur)
     document.getElementById('severity-status-bar').textContent = scenario.label;
     
     // Génération de l'ID
