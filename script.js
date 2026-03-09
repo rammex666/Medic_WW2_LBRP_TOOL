@@ -37,8 +37,18 @@ const data = {
 };
 
 document.getElementById('generate-btn').addEventListener('click', function() {
+    // Récupération des éléments du DOM
     const bodyPart = document.getElementById('body-part').value;
     const causeKey = document.getElementById('cause').value;
+    const reportSection = document.getElementById('report-output');
+    const diagnosisList = document.getElementById('diagnosis-list');
+    const protocolList = document.getElementById('protocol-list');
+    const statusStatusBar = document.getElementById('severity-status-bar');
+    const reportIdSpan = document.getElementById('report-id');
+
+    // Nettoyage immédiat des listes pour éviter l'ancien texte
+    diagnosisList.innerHTML = '';
+    protocolList.innerHTML = '';
     
     // Sélection aléatoire de la gravité
     const severityLevels = ['legere', 'moderee', 'critique'];
@@ -47,69 +57,53 @@ document.getElementById('generate-btn').addEventListener('click', function() {
     const cause = data.causes[causeKey];
     const scenario = data.scenarios[severity];
     
-    // Affichage du rapport
-    const reportSection = document.getElementById('report-output');
-    reportSection.classList.remove('hidden');
+    // Mise à jour des informations de base
+    statusStatusBar.textContent = scenario.label;
+    reportIdSpan.textContent = Math.floor(Math.random() * 90000) + 10000;
     
-    // Mise à jour de la barre de statut
-    document.getElementById('severity-status-bar').textContent = scenario.label;
-    
-    // Génération de l'ID
-    document.getElementById('report-id').textContent = Math.floor(Math.random() * 90000) + 10000;
-    
-    // Génération des indicateurs médicaux aléatoires
-    const diagnosisList = document.getElementById('diagnosis-list');
-    diagnosisList.innerHTML = '';
-
+    // Fonction utilitaire pour ajouter des éléments à la liste de diagnostic
     const addDiagItem = (label, value) => {
         const li = document.createElement('li');
         li.innerHTML = `<strong>${label} :</strong> ${value}`;
         diagnosisList.appendChild(li);
     };
 
-    addDiagItem("LOCALISATION", data.parts[bodyPart]);
-    addDiagItem("CAUSE", cause.label);
-    
-    // Logique de probabilité pour les indicateurs selon la gravité
+    // Génération des indicateurs médicaux aléatoires
     const hasFracture = (severity === 'critique' || Math.random() > 0.5);
     const hasHemorragie = (severity === 'critique' || severity === 'moderee' || Math.random() > 0.6);
-    const hasInfection = (Math.random() > 0.7);
     const hasChoc = (severity === 'critique' || (severity === 'moderee' && Math.random() > 0.5));
 
+    addDiagItem("LOCALISATION", data.parts[bodyPart]);
+    addDiagItem("CAUSE", cause.label);
     addDiagItem("FRACTURE", hasFracture ? "OUI (Ouverte/Éclats)" : "NON");
     addDiagItem("HÉMORRAGIE", hasHemorragie ? "OUI (Active)" : "NON / CONTRÔLÉE");
     addDiagItem("ÉTAT DE CHOC", hasChoc ? "PRÉSENT" : "ABSENT");
     addDiagItem("NOTE MÉDICALE", scenario.details);
     
-    // Remplissage du protocole
-    const protocolList = document.getElementById('protocol-list');
-    protocolList.innerHTML = '';
-
+    // Construction du protocole
     let finalProtocol = [...cause.protocols];
-
-    // Logique spécifique : GARROT pour membres, BANDAGE COMPRESSIF pour thorax
     const isMembre = ['bras-gauche', 'bras-droit', 'jambe-gauche', 'jambe-droit'].includes(bodyPart);
     const isThoraxAbdomen = (bodyPart === 'torse');
 
     if (isMembre && (severity === 'critique' || hasHemorragie || causeKey === 'balle')) {
         finalProtocol.unshift("Pose immédiate de GARROT (point de pression haut)");
     }
-
     if (isThoraxAbdomen) {
         finalProtocol.unshift("Application d'un BANDAGE COMPRESSIF");
     }
-
-    // Ajout des étapes basées sur la gravité (si critique)
     if (severity === 'critique' || hasChoc) {
         finalProtocol.push("Injection de morphine (1/2 grain)");
         finalProtocol.push("Évacuation chirurgicale immédiate");
     }
     
+    // Remplissage de la liste de protocole
     finalProtocol.forEach(step => {
         const li = document.createElement('li');
         li.textContent = step;
         protocolList.appendChild(li);
     });
     
+    // Affichage final du rapport et scroll
+    reportSection.classList.remove('hidden');
     reportSection.scrollIntoView({ behavior: 'smooth' });
 });
