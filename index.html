@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Field Medic Report - 1944</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="stamp">CLASSIFIÉ</div>
+            <h1>RAPPORT MÉDICAL DE CAMPAGNE</h1>
+            <p class="subtitle">Corps Expéditionnaire Allié - Section Médicale</p>
+        </header>
+
+        <main class="clipboard">
+            <section class="selection-panel">
+                <div class="form-group">
+                    <label for="body-part">ZONE DU CORPS TOUCHÉE :</label>
+                    <select id="body-part">
+                        <option value="tete">Tête / Cou</option>
+                        <option value="torse">Torse / Abdomen</option>
+                        <option value="bras-gauche">Bras Gauche</option>
+                        <option value="bras-droit">Bras Droit</option>
+                        <option value="jambe-gauche">Jambe Gauche</option>
+                        <option value="jambe-droit">Jambe Droite</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="cause">CAUSE DE LA BLESSURE :</label>
+                    <select id="cause">
+                        <option value="balle">Coup de feu (Balle)</option>
+                        <option value="mine">Explosion de mine</option>
+                        <option value="eclat">Éclats d'obus / Shrapnel</option>
+                        <option value="accident">Accident / Chute</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>GRAVITÉ DE LA BLESSURE :</label>
+                    <div class="radio-group">
+                        <input type="radio" id="legere" name="severity" value="legere" checked>
+                        <label for="legere">LÉGÈRE (Code Vert)</label>
+                        
+                        <input type="radio" id="moderee" name="severity" value="moderee">
+                        <label for="moderee">MODÉRÉE (Code Jaune)</label>
+                        
+                        <input type="radio" id="critique" name="severity" value="critique">
+                        <label for="critique">CRITIQUE (Code Rouge)</label>
+                    </div>
+                </div>
+
+                <button id="generate-btn">GÉNÉRER LE RAPPORT</button>
+            </section>
+
+            <hr class="divider">
+
+            <section id="report-output" class="report-paper hidden">
+                <div id="severity-status-bar"></div>
+                <div class="report-header">
+                    <span>DOSSIER N° <span id="report-id">--</span></span>
+                    <span>DATE: 09 MARS 1944</span>
+                </div>
+                <div class="report-content">
+                    <h3>DIAGNOSTIC :</h3>
+                    <p id="diagnosis-text" class="typewriter">Sélectionnez les paramètres et générez le rapport...</p>
+                    
+                    <h3>PROTOCOLE RECOMMANDÉ :</h3>
+                    <ul id="protocol-list" class="typewriter">
+                        <!-- Les étapes de soin apparaîtront ici -->
+                    </ul>
+                </div>
+                <div class="blood-stain"></div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 1944 Combat Medic Unit - No Remorse</p>
+        </footer>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
