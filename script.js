@@ -55,24 +55,29 @@ document.getElementById('generate-btn').addEventListener('click', function() {
     let fractureVal = "non";
     let hemorragieVal = "non";
     let infectionVal = "non";
+    let sortieVal = "non";
     const roll = Math.random();
 
     if (causeKey === 'mine') {
         fractureVal = roll > 0.2 ? "comminutive" : "ouverte";
         hemorragieVal = roll > 0.3 ? "severe" : "moyenne";
-        infectionVal = "oui"; // Les mines projettent beaucoup de terre
+        infectionVal = "oui"; 
+        sortieVal = roll > 0.6 ? "oui" : "non";
     } else if (causeKey === 'balle') {
         fractureVal = roll > 0.7 ? "ouverte" : (roll > 0.5 ? "comminutive" : "non");
         hemorragieVal = roll > 0.5 ? "severe" : (roll > 0.2 ? "moyenne" : "moderee");
         infectionVal = roll > 0.8 ? "oui" : "non";
+        sortieVal = roll > 0.3 ? "oui" : "non"; // 70% de chance de sortie
     } else if (causeKey === 'eclat') {
         fractureVal = roll > 0.6 ? "ouverte" : "non";
         hemorragieVal = roll > 0.4 ? "moyenne" : "moderee";
-        infectionVal = "oui"; // Les éclats sont souvent sales
+        infectionVal = "oui";
+        sortieVal = roll > 0.8 ? "oui" : "non"; // 20% de chance de sortie
     } else if (causeKey === 'accident') {
         fractureVal = roll > 0.5 ? "ouverte" : "non";
         hemorragieVal = roll > 0.8 ? "moderee" : "non";
         infectionVal = roll > 0.9 ? "oui" : "non";
+        sortieVal = "n/a";
     }
 
     // Détermination de la gravité pour le visuel
@@ -96,9 +101,11 @@ document.getElementById('generate-btn').addEventListener('click', function() {
     const fractureText = fractureVal === 'non' ? "AUCUNE" : `OUI (${fractureVal.toUpperCase()})`;
     const hemorragieText = hemorragieVal === 'non' ? "NON / CONTRÔLÉE" : `PRÉSENTE (${hemorragieVal.toUpperCase()})`;
     const infectionText = infectionVal === 'non' ? "NUL" : "ÉLEVÉ (EXPOSITION TERRAIN)";
+    const sortieText = sortieVal === 'n/a' ? "NON APPLICABLE" : (sortieVal === 'oui' ? "OUI (TRANSFIXIANTE)" : "NON (PROJECTILE LOGÉ)");
 
     addDiagItem("LOCALISATION", data.parts[bodyPart]);
     addDiagItem("CAUSE", cause.label);
+    addDiagItem("PLAIE DE SORTIE", sortieText);
     addDiagItem("FRACTURE", fractureText);
     addDiagItem("HÉMORRAGIE", hemorragieText);
     addDiagItem("RISQUE D'INFECTION", infectionText);
@@ -109,21 +116,8 @@ document.getElementById('generate-btn').addEventListener('click', function() {
     const isMembre = ['bras-gauche', 'bras-droit', 'jambe-gauche', 'jambe-droit'].includes(bodyPart);
     const isThoraxAbdomen = (bodyPart === 'torse');
 
-    if (isMembre && (hemorragieVal === 'severe' || hemorragieVal === 'moyenne')) {
-        finalProtocol.unshift("Pose immédiate de GARROT (point de pression haut)");
-    }
-    if (isThoraxAbdomen && (hemorragieVal !== 'non')) {
-        finalProtocol.unshift("Application d'un BANDAGE COMPRESSIF");
-    }
-    if (fractureVal !== 'non') {
-        finalProtocol.push("Immobilisation par attelle de fortune");
-    }
-    if (infectionVal === 'oui') {
-        finalProtocol.push("Application généreuse de poudre de SULFA");
-    }
-    if (severity === 'critique') {
-        finalProtocol.push("Injection de morphine (1/2 grain)");
-        finalProtocol.push("Évacuation chirurgicale PRIORITAIRE");
+    if (sortieVal === 'non' && causeKey !== 'accident') {
+        finalProtocol.push("Recherche du projectile / débridement");
     }
     
     finalProtocol.forEach(step => {
