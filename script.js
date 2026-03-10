@@ -40,9 +40,6 @@ document.getElementById('generate-btn').addEventListener('click', function() {
     // Récupération des éléments du DOM
     const bodyPart = document.getElementById('body-part').value;
     const causeKey = document.getElementById('cause').value;
-    const fractureVal = document.getElementById('fracture').value;
-    const hemorragieVal = document.getElementById('hemorragie').value;
-    const infectionVal = document.getElementById('infection').value;
 
     const reportSection = document.getElementById('report-output');
     const diagnosisList = document.getElementById('diagnosis-list');
@@ -50,11 +47,35 @@ document.getElementById('generate-btn').addEventListener('click', function() {
     const statusStatusBar = document.getElementById('severity-status-bar');
     const reportIdSpan = document.getElementById('report-id');
 
-    // Nettoyage immédiat des listes pour éviter l'ancien texte
+    // Nettoyage immédiat
     diagnosisList.innerHTML = '';
     protocolList.innerHTML = '';
     
-    // Détermination de la gravité en fonction de l'hémorragie et fracture
+    // Logique de génération aléatoire cohérente selon la cause
+    let fractureVal = "non";
+    let hemorragieVal = "non";
+    let infectionVal = "non";
+    const roll = Math.random();
+
+    if (causeKey === 'mine') {
+        fractureVal = roll > 0.2 ? "comminutive" : "ouverte";
+        hemorragieVal = roll > 0.3 ? "severe" : "moyenne";
+        infectionVal = "oui"; // Les mines projettent beaucoup de terre
+    } else if (causeKey === 'balle') {
+        fractureVal = roll > 0.7 ? "ouverte" : (roll > 0.5 ? "comminutive" : "non");
+        hemorragieVal = roll > 0.5 ? "severe" : (roll > 0.2 ? "moyenne" : "moderee");
+        infectionVal = roll > 0.8 ? "oui" : "non";
+    } else if (causeKey === 'eclat') {
+        fractureVal = roll > 0.6 ? "ouverte" : "non";
+        hemorragieVal = roll > 0.4 ? "moyenne" : "moderee";
+        infectionVal = "oui"; // Les éclats sont souvent sales
+    } else if (causeKey === 'accident') {
+        fractureVal = roll > 0.5 ? "ouverte" : "non";
+        hemorragieVal = roll > 0.8 ? "moderee" : "non";
+        infectionVal = roll > 0.9 ? "oui" : "non";
+    }
+
+    // Détermination de la gravité pour le visuel
     let severity = 'legere';
     if (hemorragieVal === 'severe' || fractureVal === 'comminutive') severity = 'critique';
     else if (hemorragieVal === 'moyenne' || hemorragieVal === 'moderee' || fractureVal === 'ouverte') severity = 'moderee';
@@ -62,18 +83,16 @@ document.getElementById('generate-btn').addEventListener('click', function() {
     const cause = data.causes[causeKey];
     const scenario = data.scenarios[severity];
     
-    // Mise à jour des informations de base
+    // Mise à jour de l'interface
     statusStatusBar.textContent = scenario.label;
     reportIdSpan.textContent = Math.floor(Math.random() * 90000) + 10000;
     
-    // Fonction utilitaire pour ajouter des éléments à la liste de diagnostic
     const addDiagItem = (label, value) => {
         const li = document.createElement('li');
         li.innerHTML = `<strong>${label} :</strong> ${value}`;
         diagnosisList.appendChild(li);
     };
 
-    // Formatage des textes pour le rapport
     const fractureText = fractureVal === 'non' ? "AUCUNE" : `OUI (${fractureVal.toUpperCase()})`;
     const hemorragieText = hemorragieVal === 'non' ? "NON / CONTRÔLÉE" : `PRÉSENTE (${hemorragieVal.toUpperCase()})`;
     const infectionText = infectionVal === 'non' ? "NUL" : "ÉLEVÉ (EXPOSITION TERRAIN)";
@@ -85,7 +104,7 @@ document.getElementById('generate-btn').addEventListener('click', function() {
     addDiagItem("RISQUE D'INFECTION", infectionText);
     addDiagItem("NOTE MÉDICALE", scenario.details);
     
-    // Construction du protocole
+    // Protocole
     let finalProtocol = [...cause.protocols];
     const isMembre = ['bras-gauche', 'bras-droit', 'jambe-gauche', 'jambe-droit'].includes(bodyPart);
     const isThoraxAbdomen = (bodyPart === 'torse');
@@ -107,14 +126,12 @@ document.getElementById('generate-btn').addEventListener('click', function() {
         finalProtocol.push("Évacuation chirurgicale PRIORITAIRE");
     }
     
-    // Remplissage de la liste de protocole
     finalProtocol.forEach(step => {
         const li = document.createElement('li');
         li.textContent = step;
         protocolList.appendChild(li);
     });
     
-    // Affichage final du rapport et scroll
     reportSection.classList.remove('hidden');
     reportSection.scrollIntoView({ behavior: 'smooth' });
 });
