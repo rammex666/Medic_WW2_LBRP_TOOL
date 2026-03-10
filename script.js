@@ -40,6 +40,10 @@ document.getElementById('generate-btn').addEventListener('click', function() {
     // Récupération des éléments du DOM
     const bodyPart = document.getElementById('body-part').value;
     const causeKey = document.getElementById('cause').value;
+    const fractureVal = document.getElementById('fracture').value;
+    const hemorragieVal = document.getElementById('hemorragie').value;
+    const infectionVal = document.getElementById('infection').value;
+
     const reportSection = document.getElementById('report-output');
     const diagnosisList = document.getElementById('diagnosis-list');
     const protocolList = document.getElementById('protocol-list');
@@ -50,9 +54,10 @@ document.getElementById('generate-btn').addEventListener('click', function() {
     diagnosisList.innerHTML = '';
     protocolList.innerHTML = '';
     
-    // Sélection aléatoire de la gravité
-    const severityLevels = ['legere', 'moderee', 'critique'];
-    const severity = severityLevels[Math.floor(Math.random() * severityLevels.length)];
+    // Détermination de la gravité en fonction de l'hémorragie et fracture
+    let severity = 'legere';
+    if (hemorragieVal === 'severe' || fractureVal === 'comminutive') severity = 'critique';
+    else if (hemorragieVal === 'moyenne' || hemorragieVal === 'moderee' || fractureVal === 'ouverte') severity = 'moderee';
     
     const cause = data.causes[causeKey];
     const scenario = data.scenarios[severity];
@@ -68,16 +73,16 @@ document.getElementById('generate-btn').addEventListener('click', function() {
         diagnosisList.appendChild(li);
     };
 
-    // Génération des indicateurs médicaux aléatoires
-    const hasFracture = (severity === 'critique' || Math.random() > 0.5);
-    const hasHemorragie = (severity === 'critique' || severity === 'moderee' || Math.random() > 0.6);
-    const hasChoc = (severity === 'critique' || (severity === 'moderee' && Math.random() > 0.5));
+    // Formatage des textes pour le rapport
+    const fractureText = fractureVal === 'non' ? "AUCUNE" : `OUI (${fractureVal.toUpperCase()})`;
+    const hemorragieText = hemorragieVal === 'non' ? "NON / CONTRÔLÉE" : `PRÉSENTE (${hemorragieVal.toUpperCase()})`;
+    const infectionText = infectionVal === 'non' ? "NUL" : "ÉLEVÉ (EXPOSITION TERRAIN)";
 
     addDiagItem("LOCALISATION", data.parts[bodyPart]);
     addDiagItem("CAUSE", cause.label);
-    addDiagItem("FRACTURE", hasFracture ? "OUI (Ouverte/Éclats)" : "NON");
-    addDiagItem("HÉMORRAGIE", hasHemorragie ? "OUI (Active)" : "NON / CONTRÔLÉE");
-    addDiagItem("ÉTAT DE CHOC", hasChoc ? "PRÉSENT" : "ABSENT");
+    addDiagItem("FRACTURE", fractureText);
+    addDiagItem("HÉMORRAGIE", hemorragieText);
+    addDiagItem("RISQUE D'INFECTION", infectionText);
     addDiagItem("NOTE MÉDICALE", scenario.details);
     
     // Construction du protocole
@@ -85,15 +90,21 @@ document.getElementById('generate-btn').addEventListener('click', function() {
     const isMembre = ['bras-gauche', 'bras-droit', 'jambe-gauche', 'jambe-droit'].includes(bodyPart);
     const isThoraxAbdomen = (bodyPart === 'torse');
 
-    if (isMembre && (severity === 'critique' || hasHemorragie || causeKey === 'balle')) {
+    if (isMembre && (hemorragieVal === 'severe' || hemorragieVal === 'moyenne')) {
         finalProtocol.unshift("Pose immédiate de GARROT (point de pression haut)");
     }
-    if (isThoraxAbdomen) {
+    if (isThoraxAbdomen && (hemorragieVal !== 'non')) {
         finalProtocol.unshift("Application d'un BANDAGE COMPRESSIF");
     }
-    if (severity === 'critique' || hasChoc) {
+    if (fractureVal !== 'non') {
+        finalProtocol.push("Immobilisation par attelle de fortune");
+    }
+    if (infectionVal === 'oui') {
+        finalProtocol.push("Application généreuse de poudre de SULFA");
+    }
+    if (severity === 'critique') {
         finalProtocol.push("Injection de morphine (1/2 grain)");
-        finalProtocol.push("Évacuation chirurgicale immédiate");
+        finalProtocol.push("Évacuation chirurgicale PRIORITAIRE");
     }
     
     // Remplissage de la liste de protocole
