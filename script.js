@@ -60,30 +60,30 @@ document.getElementById('generate-btn').addEventListener('click', function() {
 
     if (causeKey === 'mine') {
         fractureVal = roll > 0.2 ? "comminutive" : "ouverte";
-        hemorragieVal = roll > 0.3 ? "severe" : "moyenne";
+        hemorragieVal = roll > 0.3 ? "sévère" : "moyenne";
         infectionVal = "oui"; 
         sortieVal = roll > 0.6 ? "oui" : "non";
     } else if (causeKey === 'balle') {
         fractureVal = roll > 0.7 ? "ouverte" : (roll > 0.5 ? "comminutive" : "non");
-        hemorragieVal = roll > 0.5 ? "severe" : (roll > 0.2 ? "moyenne" : "moderee");
+        hemorragieVal = roll > 0.5 ? "sévère" : (roll > 0.2 ? "moyenne" : "modérée");
         infectionVal = roll > 0.8 ? "oui" : "non";
         sortieVal = roll > 0.3 ? "oui" : "non"; // 70% de chance de sortie
     } else if (causeKey === 'eclat') {
         fractureVal = roll > 0.6 ? "ouverte" : "non";
-        hemorragieVal = roll > 0.4 ? "moyenne" : "moderee";
+        hemorragieVal = roll > 0.4 ? "moyenne" : "modérée";
         infectionVal = "oui";
         sortieVal = roll > 0.8 ? "oui" : "non"; // 20% de chance de sortie
     } else if (causeKey === 'accident') {
         fractureVal = roll > 0.5 ? "ouverte" : "non";
-        hemorragieVal = roll > 0.8 ? "moderee" : "non";
+        hemorragieVal = roll > 0.8 ? "modérée" : "non";
         infectionVal = roll > 0.9 ? "oui" : "non";
         sortieVal = "n/a";
     }
 
     // Détermination de la gravité pour le visuel
     let severity = 'legere';
-    if (hemorragieVal === 'severe' || fractureVal === 'comminutive') severity = 'critique';
-    else if (hemorragieVal === 'moyenne' || hemorragieVal === 'moderee' || fractureVal === 'ouverte') severity = 'moderee';
+    if (hemorragieVal === 'sévère' || fractureVal === 'comminutive') severity = 'critique';
+    else if (hemorragieVal === 'moyenne' || hemorragieVal === 'modérée' || fractureVal === 'ouverte') severity = 'moderee';
     
     const cause = data.causes[causeKey];
     const scenario = data.scenarios[severity];
@@ -103,6 +103,7 @@ document.getElementById('generate-btn').addEventListener('click', function() {
     const infectionText = infectionVal === 'non' ? "NUL" : "ÉLEVÉ (EXPOSITION TERRAIN)";
     const sortieText = sortieVal === 'n/a' ? "NON APPLICABLE" : (sortieVal === 'oui' ? "OUI (TRANSFIXIANTE)" : "NON (PROJECTILE LOGÉ)");
 
+    // On s'assure de l'ordre d'affichage
     addDiagItem("LOCALISATION", data.parts[bodyPart]);
     addDiagItem("CAUSE", cause.label);
     addDiagItem("PLAIE DE SORTIE", sortieText);
@@ -113,8 +114,6 @@ document.getElementById('generate-btn').addEventListener('click', function() {
     
     // Protocole
     let finalProtocol = [...cause.protocols];
-    const isMembre = ['bras-gauche', 'bras-droit', 'jambe-gauche', 'jambe-droit'].includes(bodyPart);
-    const isThoraxAbdomen = (bodyPart === 'torse');
 
     if (sortieVal === 'non' && causeKey !== 'accident') {
         finalProtocol.push("Recherche du projectile / débridement");
